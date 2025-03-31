@@ -3,3 +3,5 @@ dict/
 pdf_data/
 temp/
 data/
+
+__pycache__/
