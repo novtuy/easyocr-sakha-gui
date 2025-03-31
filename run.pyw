@@ -1,5 +1,6 @@
 import os
 import cv2
+import fitz                                                             # библиотека для обработки PDF
 from easyocr import Reader
 from spellchecker import SpellChecker
 from PyQt5 import QtWidgets, uic
@@ -7,23 +8,16 @@ from PyQt5.QtGui import QPixmap, QImage, QTextCursor, QTextCharFormat
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QApplication, QMenu, QFileDialog, QAction, QMessageBox
 from PyQt5.QtWidgets import QPushButton, QListWidget, QLabel, QTextEdit, QSpinBox
-import fitz                                                             # библиотека для обработки PDF
+
+from utils import *
 
 def import_Reader_from_easyocr():
     from easyocr import Reader
 
 class MyWindow(QtWidgets.QWidget):
-    __DCT = "0123456789!\"#$%&'()*+,-./:;<=>?@[\\]^_`" + \
-        "{|}~ €«»”“¤АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюяҔӨҺҮҤҕөһүҥ"
-    DIR_NAME = os.path.dirname(os.path.abspath(__file__))
-    DATA_DIRECTORY = f'{DIR_NAME}/data'                                 # месторасположения файлов изображений
-    PDF_DIRECTORY = f'{DIR_NAME}/pdf_data'                              # месторасположения файлов PDF
-    MODEL_NAME = "my_example"                                           # имя выбранной модели
-    PDF_IM_SW = {"pdf": 2, "image": 1}
-    TEMP_FILE = f"{DIR_NAME}/temp/temp_image.png"                      # месторасположения временных файлов
+    MODEL_NAME = "my_example"                                     # имя выбранной модели
     
     def __init__(self, parent=None):
-        # Выделенный/указанный файл. 
         # При изменении режима возвращается к значению None
         self.pre_selected_file = None
         # Выбранный файл
@@ -31,11 +25,11 @@ class MyWindow(QtWidgets.QWidget):
         # Путь до выбранного изображения
         self.path_to_file = None
         # Список файлов в папке data (по умолчанию)
-        FILES = list(os.listdir(self.DATA_DIRECTORY))
+        FILES = list(os.listdir(DirOfData.image.value))
         # Флаг для отключения/включения работы spellchecker
         self.pickoutflag = False
         # Флаг для переключения режима между Изображения/PDF
-        self.read_regimeflag = self.PDF_IM_SW["image"]
+        self.read_regimeflag = TypeOfData.image
         # Флаг для работающего режима Изображения/PDF
         # Необходимо для генерации после предобработки, чтобы настройка не слетала
         self.process_regimeflag = None
@@ -92,17 +86,17 @@ class MyWindow(QtWidgets.QWidget):
         )
 
         if reply == QMessageBox.Yes:
-            if os.path.exists(MyWindow.TEMP_FILE):
-                os.remove(MyWindow.TEMP_FILE)
+            if os.path.exists(temp_file):
+                os.remove(temp_file)
             event.accept()  # Закрываем окно
         else:
             event.ignore()  # Отменяем закрытие окна
     
     # Функция для обработки клика по списку листа
     def list_item_clicked(self, item):
-        if self.read_regimeflag == self.PDF_IM_SW["image"]:
+        if self.read_regimeflag == TypeOfData.image:
             self.pre_selected_file = item.text()
-        elif self.read_regimeflag == self.PDF_IM_SW["pdf"]:
+        elif self.read_regimeflag == TypeOfData.pdf:
             self.pre_selected_file = item.text()
             self.spin_pdf.setValue(1)    
     
@@ -182,39 +176,39 @@ class MyWindow(QtWidgets.QWidget):
         return out_lst    
     
     def image_clicked(self):
-        self.read_regimeflag = self.PDF_IM_SW["image"]
+        self.read_regimeflag = TypeOfData.image
         self.pre_selected_file = None
         self.update_clicked()
         
     def pdf_clicked(self):
-        self.read_regimeflag = self.PDF_IM_SW["pdf"]
+        self.read_regimeflag = TypeOfData.pdf
         self.pre_selected_file = None
         self.update_clicked()
     
     def update_clicked(self):
-        if self.read_regimeflag == self.PDF_IM_SW["image"]:
-            self.FILES = list(os.listdir(self.DATA_DIRECTORY))
+        if self.read_regimeflag == TypeOfData.image:
+            self.FILES = list(os.listdir(DirOfData.image.value))
             self.listFiles.clear()
             self.listFiles.addItems(self.FILES)
-        elif self.read_regimeflag == self.PDF_IM_SW["pdf"]:
-            self.FILES = list(os.listdir(self.PDF_DIRECTORY))
+        elif self.read_regimeflag == TypeOfData.pdf:
+            self.FILES = list(os.listdir(DirOfData.pdf.value))
             self.listFiles.clear()
             self.listFiles.addItems(self.FILES)
          
     def select_clicked(self):
         if self.pre_selected_file == None:
             return
-        if self.read_regimeflag == self.PDF_IM_SW["image"]:
-            self.pixmap = QPixmap(f"{self.DIR_NAME}/data/{self.pre_selected_file}")
+        if self.read_regimeflag == TypeOfData.image:
+            self.pixmap = QPixmap(f"{project_dir}/data/{self.pre_selected_file}")
             self.labelOCR.setPixmap(self.pixmap.scaled(self.labelOCR.size(), 
                                                   aspectRatioMode=Qt.AspectRatioMode.KeepAspectRatio,
                                                   transformMode=Qt.TransformationMode.SmoothTransformation))
             self.selected_file = self.pre_selected_file
             self.path_to_file = f"data/{self.selected_file}"
-            self.process_regimeflag = self.PDF_IM_SW["image"]
-        elif self.read_regimeflag == self.PDF_IM_SW["pdf"]:
+            self.process_regimeflag = TypeOfData.image
+        elif self.read_regimeflag == TypeOfData.pdf:
             # Загрузка PDF-файла
-            doc = fitz.open(f"{self.DIR_NAME}/pdf_data/{self.pre_selected_file}")
+            doc = fitz.open(f"{project_dir}/pdf_data/{self.pre_selected_file}")
             page_count = doc.page_count
             self.spin_pdf.setRange(1, page_count)
             # self.spin_pdf.setValue(1)
@@ -233,38 +227,38 @@ class MyWindow(QtWidgets.QWidget):
                                                   aspectRatioMode=Qt.AspectRatioMode.KeepAspectRatio,
                                                   transformMode=Qt.TransformationMode.SmoothTransformation))
             self.selected_file = self.pre_selected_file
-            self.process_regimeflag = self.PDF_IM_SW["pdf"]
+            self.process_regimeflag = TypeOfData.pdf
             # Закрытие документа
             doc.close()
             
     def preprocess_clicked(self):
         if self.selected_file == None:
             return
-        if self.read_regimeflag == self.PDF_IM_SW["image"]:
-            filtered_image = cv2.imread(f"{self.DIR_NAME}/data/{self.selected_file}")
+        if self.read_regimeflag == TypeOfData.image:
+            filtered_image = cv2.imread(f"{project_dir}/data/{self.selected_file}")
             filtered_image = cv2.cvtColor(filtered_image, cv2.COLOR_BGR2GRAY)
             filtered_image = cv2.resize(filtered_image, None, fx=2, fy=2, interpolation=cv2.INTER_CUBIC)
             self.path_to_file = f"temp/temp_image_enhanced.png"
-            cv2.imwrite(f'{self.DIR_NAME}/{self.path_to_file}', filtered_image)
-            self.pixmap = QPixmap(f"{self.DIR_NAME}/{self.path_to_file}")
+            cv2.imwrite(f'{project_dir}/{self.path_to_file}', filtered_image)
+            self.pixmap = QPixmap(f"{project_dir}/{self.path_to_file}")
             self.labelOCR.setPixmap(self.pixmap.scaled(self.labelOCR.size(), 
                                                   aspectRatioMode=Qt.AspectRatioMode.KeepAspectRatio,
                                                   transformMode=Qt.TransformationMode.SmoothTransformation))
-            self.process_regimeflag = self.PDF_IM_SW["image"]
+            self.process_regimeflag = TypeOfData.image
 
     def process_clicked(self):
         if 'reader' not in self.__dict__:
             # import_Reader_from_easyocr()
             self.reader = Reader(['ru'], 
                                     recog_network=f"{self.MODEL_NAME}",
-                                    user_network_directory=f"{self.DIR_NAME}/models/user_network",
-                                    model_storage_directory=f'{self.DIR_NAME}/models/model')
-        if self.process_regimeflag == self.PDF_IM_SW["image"]:    
-            result = " ".join(self.reader.readtext(f"{self.DIR_NAME}/{self.path_to_file}",
-                                    allowlist=self.__DCT, detail=0, paragraph=True))
-        elif self.process_regimeflag == self.PDF_IM_SW["pdf"]:
-            self.pix_pdf.save(self.TEMP_FILE, "JPEG")
-            result = " ".join(self.reader.readtext(self.TEMP_FILE, allowlist=self.__DCT, detail=0, paragraph=True))
+                                    user_network_directory=f"{project_dir}/models/user_network",
+                                    model_storage_directory=f'{project_dir}/models/model')
+        if self.process_regimeflag == TypeOfData.image:    
+            result = " ".join(self.reader.readtext(f"{project_dir}/{self.path_to_file}",
+                                    allowlist=DCT, detail=0, paragraph=True))
+        elif self.process_regimeflag == TypeOfData.pdf:
+            self.pix_pdf.save(temp_file, "JPEG")
+            result = " ".join(self.reader.readtext(temp_file, allowlist=DCT, detail=0, paragraph=True))
             
         self.magic_clicked()
         # self.textLabel.setPlainText(result)
@@ -289,7 +283,7 @@ class MyWindow(QtWidgets.QWidget):
         lst_text = self.splittingText(current_text)
         lst_text_lower = list(map(lambda x: x.lower(), lst_text))
         lst_text_for_spell = list(filter(lambda x: x.isalpha(), lst_text_lower))
-        self.spell = SpellChecker(distance=1, local_dictionary=f'{self.DIR_NAME}/dict/frequency_dict.json')
+        self.spell = SpellChecker(distance=1, local_dictionary=f'{project_dir}/dict/frequency_dict.json')
         self.misspelled = self.spell.unknown(lst_text_for_spell)
         for eli in self.misspelled:
             for j, elj in enumerate(lst_text_lower):
@@ -331,5 +325,4 @@ if __name__ == "__main__":
     window = MyWindow()
     window.setWindowTitle('Sakha_text_OCR')
     window.show()
-    # print(MyWindow.TEMP_FILE)
     sys.exit(app.exec())
