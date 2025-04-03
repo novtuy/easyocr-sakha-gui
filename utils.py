@@ -20,8 +20,4 @@ class TypeOfData(Enum):
 class DirOfData(Enum):
     pdf = os.path.join(project_dir, 'pdf_data')
     image = os.path.join(project_dir, 'data')
-    
-
-print(DirOfData.pdf.value)
-print(TypeOfData.pdf.value)
 

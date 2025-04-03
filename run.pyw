@@ -11,13 +11,14 @@ from PyQt5.QtWidgets import QPushButton, QListWidget, QLabel, QTextEdit, QSpinBo
 
 from utils import *
 
-def import_Reader_from_easyocr():
-    from easyocr import Reader
+# def import_Reader_from_easyocr():
+#     from easyocr import Reader
 
 class MyWindow(QtWidgets.QWidget):
     MODEL_NAME = "my_example"                                     # имя выбранной модели
     
     def __init__(self, parent=None):
+        # Выделенный файл
         # При изменении режима возвращается к значению None
         self.pre_selected_file = None
         # Выбранный файл
@@ -230,7 +231,8 @@ class MyWindow(QtWidgets.QWidget):
             self.process_regimeflag = TypeOfData.pdf
             # Закрытие документа
             doc.close()
-            
+    
+    # Кнопка обработка
     def preprocess_clicked(self):
         if self.selected_file == None:
             return
@@ -277,6 +279,7 @@ class MyWindow(QtWidgets.QWidget):
         
         self.pickoutflag = False
     
+    # Кнопка "Выделить некорректные слова"
     def pickout_clicked(self):
         self.pickoutflag = True
         current_text = self.textLabel.toPlainText()
@@ -296,7 +299,8 @@ f"<span style=\"background-color: moccasin;\">{lst_text[j]}</span>"
 f"<span style=\"background-color: indianred;\">{lst_text[j]}</span>"
         joined_text = "".join(lst_text).replace("\n", "<br/>")
         self.textLabel.setHtml(joined_text)
-        
+    
+    # Кнопка "Очистить"
     def magic_clicked(self):
         self.textLabel.setPlainText(self.textLabel.toPlainText())
         cursor = self.textLabel.textCursor()
