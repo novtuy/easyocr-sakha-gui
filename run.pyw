@@ -15,7 +15,7 @@ from utils import *
 #     from easyocr import Reader
 
 class MyWindow(QtWidgets.QWidget):
-    MODEL_NAME = "my_example"                                     # имя выбранной модели
+    MODEL_NAME = "yuk_example"                                     # имя выбранной модели
     
     def __init__(self, parent=None):
         # Выделенный файл
@@ -111,6 +111,12 @@ class MyWindow(QtWidgets.QWidget):
         # Создаем контекстное меню
         contextMenu = QMenu(self.textLabel)
         
+        contextMenu.setStyleSheet("""
+        QMenu { background: white; border: 1px solid gray; }
+        QMenu::item { padding: 5px 20px; }
+        QMenu::item:selected { background: #e0e0e0; }
+        """)
+        
         spellflag = False
         
         # Добавляем действия с русскими надписями
@@ -195,15 +201,32 @@ class MyWindow(QtWidgets.QWidget):
             self.FILES = list(os.listdir(DirOfData.pdf.value))
             self.listFiles.clear()
             self.listFiles.addItems(self.FILES)
+    
+    def resizeEvent(self, event):
+        """Обработчик изменения размера окна"""
+        super().resizeEvent(event)
+        if hasattr(self, 'pixmap') and not self.pixmap.isNull():
+            self.update_image()
+    
+    def update_image(self):
+        """Масштабирует изображение под текущий размер QLabel"""
+        self.labelOCR.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        scaled_pixmap = self.pixmap.scaled(
+            self.labelOCR.size(), 
+            Qt.AspectRatioMode.KeepAspectRatio, 
+            Qt.TransformationMode.SmoothTransformation
+        )
+        self.labelOCR.setPixmap(scaled_pixmap)
          
     def select_clicked(self):
         if self.pre_selected_file == None:
             return
         if self.read_regimeflag == TypeOfData.image:
             self.pixmap = QPixmap(f"{project_dir}/data/{self.pre_selected_file}")
-            self.labelOCR.setPixmap(self.pixmap.scaled(self.labelOCR.size(), 
-                                                  aspectRatioMode=Qt.AspectRatioMode.KeepAspectRatio,
-                                                  transformMode=Qt.TransformationMode.SmoothTransformation))
+            # self.labelOCR.setPixmap(self.pixmap.scaled(self.labelOCR.size(), 
+            #                                       aspectRatioMode=Qt.AspectRatioMode.KeepAspectRatio,
+            #                                       transformMode=Qt.TransformationMode.SmoothTransformation))
+            self.update_image()
             self.selected_file = self.pre_selected_file
             self.path_to_file = f"data/{self.selected_file}"
             self.process_regimeflag = TypeOfData.image
@@ -216,7 +239,7 @@ class MyWindow(QtWidgets.QWidget):
             current_spin = self.spin_pdf.value()
             # Отображение первой страницы PDF
             page = doc.load_page(current_spin - 1)  # Загрузка первой страницы
-            zoom = 6.0
+            zoom = 4.0
             matrix = fitz.Matrix(zoom, zoom)
             self.pix_pdf = page.get_pixmap(matrix=matrix)  # Преобразование страницы в изображение
 
@@ -224,9 +247,11 @@ class MyWindow(QtWidgets.QWidget):
             img = QImage(self.pix_pdf.samples, self.pix_pdf.width, 
                          self.pix_pdf.height, self.pix_pdf.stride, 
                          QImage.Format.Format_RGB888)
-            self.labelOCR.setPixmap(QPixmap.fromImage(img).scaled(self.labelOCR.size(), 
-                                                  aspectRatioMode=Qt.AspectRatioMode.KeepAspectRatio,
-                                                  transformMode=Qt.TransformationMode.SmoothTransformation))
+            self.pixmap = QPixmap.fromImage(img)
+            self.update_image()
+            # self.labelOCR.setPixmap(self.pixmap.scaled(self.labelOCR.size(), 
+            #                                       aspectRatioMode=Qt.AspectRatioMode.KeepAspectRatio,
+            #                                       transformMode=Qt.TransformationMode.SmoothTransformation))
             self.selected_file = self.pre_selected_file
             self.process_regimeflag = TypeOfData.pdf
             # Закрытие документа
@@ -243,9 +268,10 @@ class MyWindow(QtWidgets.QWidget):
             self.path_to_file = f"temp/temp_image_enhanced.png"
             cv2.imwrite(f'{project_dir}/{self.path_to_file}', filtered_image)
             self.pixmap = QPixmap(f"{project_dir}/{self.path_to_file}")
-            self.labelOCR.setPixmap(self.pixmap.scaled(self.labelOCR.size(), 
-                                                  aspectRatioMode=Qt.AspectRatioMode.KeepAspectRatio,
-                                                  transformMode=Qt.TransformationMode.SmoothTransformation))
+            # self.labelOCR.setPixmap(self.pixmap.scaled(self.labelOCR.size(), 
+            #                                       aspectRatioMode=Qt.AspectRatioMode.KeepAspectRatio,
+            #                                       transformMode=Qt.TransformationMode.SmoothTransformation))
+            self.update_image()
             self.process_regimeflag = TypeOfData.image
 
     def process_clicked(self):
@@ -293,10 +319,12 @@ class MyWindow(QtWidgets.QWidget):
                 if eli == elj:
                     if self.spell.candidates(eli):
                         lst_text[j] = \
-f"<span style=\"background-color: moccasin;\">{lst_text[j]}</span>"
+  f"<span style=\"color: darkorange;\">{lst_text[j]}</span>"
+  # f"<span style=\"background-color: moccasin;\">{lst_text[j]}</span>"
                     else:
                         lst_text[j] = \
-f"<span style=\"background-color: indianred;\">{lst_text[j]}</span>"
+f"<span style=\"color: red;\">{lst_text[j]}</span>"
+# f"<span style=\"background-color: indianred;\">{lst_text[j]}</span>"
         joined_text = "".join(lst_text).replace("\n", "<br/>")
         self.textLabel.setHtml(joined_text)
     
