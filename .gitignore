@@ -1,8 +1,14 @@
+.gitignore
+conda_activator.cmd
+readme.txt
+requirements.in
+
 models/
 dict/
 pdf_data/
 temp/
 data/
 my_test/
+venv/
 
 __pycache__/

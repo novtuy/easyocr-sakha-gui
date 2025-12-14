@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>531</width>
-    <height>400</height>
+    <width>798</width>
+    <height>593</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -223,7 +223,7 @@ p, li { white-space: pre-wrap; }
           <string notr="true">background-color: #dfdfdf</string>
          </property>
          <property name="text">
-          <string>Обработать</string>
+          <string>Настройка</string>
          </property>
         </widget>
        </item>
@@ -245,7 +245,7 @@ p, li { white-space: pre-wrap; }
           <string notr="true">background-color: #dfdfdf</string>
          </property>
          <property name="text">
-          <string>Генерировать</string>
+          <string>Генерация</string>
          </property>
          <attribute name="buttonGroup">
           <string notr="true">buttonGroup</string>
