@@ -2,13 +2,13 @@
 conda_activator.cmd
 readme.txt
 requirements.in
+models/model/craft_mlt_25k.pth
 
-models/
-dict/
-pdf_data/
+pdf_data/*
 temp/
-data/
 my_test/
 venv/
 
 __pycache__/
+
+!pdf_data/Дьикти-капкаан.pdf

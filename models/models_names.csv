@@ -1,0 +1,3 @@
+CRNN_yukagir: yuk_example
+CRNN_sakha: vgg_example
+Rosetta_sakha: resnet_example
