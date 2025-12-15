@@ -29,3 +29,7 @@ pip install -r requirements.txt
 - Добавление возможности выделения части изображения для подачи в OCR;
 - Поддержка drag-and-drop и улучшение работы с файлами;
 - Дообучение моделей OCR;
+
+## Ссылки
+- (https://github.com/JaidedAI/EasyOCR)
+- (https://github.com/clovaai/deep-text-recognition-benchmark)
