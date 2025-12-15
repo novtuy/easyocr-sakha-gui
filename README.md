@@ -31,5 +31,6 @@ pip install -r requirements.txt
 - Дообучение моделей OCR;
 
 ## Ссылки
-- (https://github.com/JaidedAI/EasyOCR)
-- (https://github.com/clovaai/deep-text-recognition-benchmark)
+- https://github.com/JaidedAI/EasyOCR
+- https://github.com/clovaai/deep-text-recognition-benchmark
+
